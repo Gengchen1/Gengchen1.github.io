@@ -22,7 +22,7 @@ export default defineConfig({
   site: 'https://drowsyindra.github.io',
   integrations: [tailwind(), react(), sitemap()],
   markdown: {
-    syntaxHighlight: 'shiki', // Enable syntax highlighting
+    // syntaxHighlight: 'shiki', // Enable syntax highlighting
     shikiConfig: {
       // 选择 Shiki 内置的主题（或添加你自己的主题）
       // https://shiki.style/themes
