@@ -22,7 +22,7 @@ export default defineConfig({
   site: 'https://Gengchen1.github.io',
   integrations: [tailwind(), react(), sitemap()],
   markdown: {
-    syntaxHighlight: 'shiki',
+    syntaxHighlight: true,
     smartypants: true,
     remarkPlugins: [remarkMath, remarkDirective, remarkEmbed, remarkSpoiler, remarkReadingTime],
     rehypePlugins: [
