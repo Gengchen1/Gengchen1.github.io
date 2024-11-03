@@ -52,7 +52,7 @@ export default defineConfig({
       // 查找常用转换器：https://shiki.style/packages/transformers
       transformers: [],
     },
-    syntaxHighlight: true, // 使用 Shiki 作为语法高亮引擎
+    syntaxHighlight: 'shiki', // 使用 Shiki 作为语法高亮引擎
     smartypants: true,
     remarkPlugins: [remarkMath, remarkDirective, remarkEmbed, remarkSpoiler, remarkReadingTime],
     rehypePlugins: [
