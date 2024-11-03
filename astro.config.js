@@ -22,7 +22,7 @@ export default defineConfig({
   site: 'https://drowsyindra.github.io',
   integrations: [tailwind(), react(), sitemap()],
   markdown: {
-    syntaxHighlight: true, // Enable syntax highlighting
+    // syntaxHighlight: true, // Enable syntax highlighting
     smartypants: false,
     remarkPlugins: [remarkMath, remarkDirective, remarkEmbed, remarkSpoiler, remarkReadingTime],
     rehypePlugins: [
