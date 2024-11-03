@@ -40,7 +40,7 @@ export default defineConfig({
       // 添加自定义语言
       // 注意：Shiki 内置了无数语言，包括 .astro！
       // https://shiki.style/languages
-      langs: ['c', 'C++', 'cjs', 'python', 'rust', 'typescript'],
+      langs: ['c', 'cpp', 'cjs', 'python', 'rust', 'typescript'],
       // 为语言添加自定义别名
       // 将别名映射到 Shiki 语言 ID：https://shiki.style/languages#bundled-languages
       // https://shiki.style/guide/load-lang#custom-language-aliases
