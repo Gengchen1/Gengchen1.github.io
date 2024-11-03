@@ -13,7 +13,7 @@ comments: true
 
 一般的初始化方式：
 
-```C++
+```cpp
 #include <iostream>
 
 class Entity
@@ -45,7 +45,7 @@ int main()
 
 通过初始化列表来初始化成员变量：
 
-```C++
+```cpp
 class Entity
 {
 private:
@@ -93,7 +93,7 @@ public:
 > 第二个原因是
 > 写在函数体内,会创建两个字符串, 一次默认构造函数创建,一次是 std::string("Unknown")参数,造成了资源浪费.
 
-```C++
+```cpp
 class Example
 {
 public:
@@ -141,7 +141,7 @@ Created Entity with8!
 当需要根据一种特定的条件给变量赋值时，可以用一个问号加冒号来代替 `if else` 语句。
 两个例子：
 
-```C++
+```cpp
 static int s_Level = 8;
 static int s_Speed = 2;
 // 1.
@@ -156,7 +156,7 @@ std::string rank = s_Level > 10 ? "Master" : "Beginner"; // 这样写不仅整�
 
 **栈分配**
 
-```C++
+```cpp
 // 在栈中创建
 Entity entity;
 Entity entity("lk"); // 等价于 Entity entity = Entity("lk");
@@ -167,7 +167,7 @@ Entity entity("lk"); // 等价于 Entity entity = Entity("lk");
 
 **堆分配**
 
-```C++
+```cpp
 Entity* entity = new Entity("lk");
 delete entity; //使用完对象后，要手动进行删除。
 ```
@@ -183,7 +183,7 @@ delete entity; //使用完对象后，要手动进行删除。
 - new关键字的底层其实就是调用了C标准库里的 `malloc()` 函数来分配内存，然后又调用了 `Entity` 的构造函数。
 - delete则会调用destructor析构函数。
 
-```C++
+```cpp
 Entity* e = new Entity();
 Entity* e = (Entity*)malloc(sizeof(Entity));
 //以上两行代码唯一的区别就是new关键字还调用了Entity的构造函数。
@@ -194,7 +194,7 @@ Entity* e = (Entity*)malloc(sizeof(Entity));
 
 - new支持一种叫 placement new 的用法，这决定了他的内存来自那里，所以其实并没有真正分配内存，在这种情况下，你只需要调用构造函数，并在一个特定的内存地址中初始化你的Entity，可以通过些new()然后指定内存地址，例如：
 
-```C++
+```cpp
 int* b = new int[50];
 Entity* entity = new(b) Entity();
 ```
@@ -203,7 +203,7 @@ Entity* entity = new(b) Entity();
 
 C++允许编译器对代码进行一次隐式的转换。- 比如开始将一种数据类型作为另一种类型来使用时，在这两种类型之间就会有类型转换。
 
-```C++
+```cpp
 class Entity
 {
 private:
@@ -229,7 +229,7 @@ int main()
 }
 ```
 
-```C++
+```cpp
 Entity a = 22; // 尽量不要这样写
 Entity a(22);
 ```
@@ -237,7 +237,7 @@ Entity a(22);
 **explicit关键字**
 如果使用 `explicit` 关键字，会禁用隐式转换:
 
-```C++
+```cpp
 explicit Entity(int age)
 	: m_Name("Unknown"), m_Age(age) {}
 // explicit 关键字放在构造函数前面
@@ -249,7 +249,7 @@ Entity a = 22; // error!
 
 > 假设你有一个`Vector`类，这个类有一个接受一个浮点数的构造函数，用于创建一个长度为该浮点数的向量, 如果不用关键字 `explicit` , 可能会不小心比较了向量和浮点数,而如果使用了 `explicit`
 
-```C++
+```cpp
 class Vector {
 public:
 	explicit Vector(float length)
@@ -280,7 +280,7 @@ _可以说,操作符就是一个函数_
 
 `*` 和 `+` 操作符的重载：
 
-```C++
+```cpp
 struct Vector2
 {
 	float x, float y;
@@ -309,7 +309,7 @@ int main()
 
 `<<` 操作符的重载
 
-```C++
+```cpp
 std::cout << result << std::endl; // error! 因为result这变量的类型没有重载 << 操作符
 std::cout << "Zhaogengchen" << std::endl; // ok! 因为 `"Zhaogengchen"` 是一个字符串字面量，它可以被自动转换为 `std::string` 类型，而 `std::ostream` 已经定义了 `<<` 操作符的重载来输出 `std::string` 类型的数据。
 
@@ -322,7 +322,7 @@ std::cout << "Zhaogengchen" << std::endl; // ok! 因为 `"Zhaogengchen"` 是�
 
 对于二元操作符（如 `+`，`-`，`*`，`/`，`<<` 等），它们有两个操作数：左操作数和右操作数。在操作符重载函数中，这两个操作数被视为函数的两个参数。
 
-```C++
+```cpp
 std::cout << Vector2 << std::endl; // 将std::cout这个stream类型和Vector类型作为参数，将Vector中的数据输出到stream流中后，返回steram,以便后续继续使用<<.
 ```
 
@@ -341,7 +341,7 @@ std::cout << Vector2 << std::endl; // 将std::cout这个stream类型和Vector类
 
 当我们想要在类中调用外部函数，且这个函数接受一个Entity类型作为参数时，就可以使用 `this` 。
 
-```C++
+```cpp
 class Entity; // 前置声明
 void PrintEntity(Entity* e);
 
@@ -386,7 +386,7 @@ void PrintEntity(const Entity& e)
 
 作用域可以是任何东西，比如说，函数作用域，还有if语句作用域，或者for和while循环作用域，或者空作用域、类作用域。
 
-```C++
+```cpp
 // 类作用域上的变量在类对象结束时就被摧毁了：
 class Entity
 {
@@ -421,7 +421,7 @@ int main()
 
 创建错误用法：
 
-```C++
+```cpp
 int* CreateArray()
 {
 	int array[50]; // 只是在栈上创建了，array是一个指向栈内存的指针。
@@ -444,7 +444,7 @@ void CearteArray(int* array)
 
 作用域指针 - 本质上是一个类，一个指针的包装器。**在构造时在堆上分配指针，然后在析构时删除指针**
 
-```C++
+```cpp
 // 作用域指针的实现：
 class ScopedPtr
 {
@@ -498,13 +498,13 @@ _unique_ptr_ 是不能复制的，因为如果复制了就相当于有两个ptr�
 在使用`unique_ptr`的时候,有两种选择:
 第一种选择:
 
-```C++
+```cpp
 std::unique_prt<Entity> entity(new Entity()); // 这样不太安全,在构造函数发生异常时,会得到一个没有引用的空指针,容易造成内存泄漏.
 ```
 
 第二种选择:
 
-```C++
+```cpp
 std::unique_ptr<Entity> entity = std::make_unique<Entity>(); // 这样更加安全,不会造成内存泄漏.
 ```
 
@@ -518,7 +518,7 @@ std::unique_ptr<Entity> entity = std::make_unique<Entity>(); // 这样更加安�
 
 `shared_ptr` 的工作方式是通过引用计数的，引用计数就是一种跟踪统计你的指针有多少引用的方法, 一旦引用计数为0，这个指针就会被删除。
 
-```C++
+```cpp
 std::shared_ptr<Entity> sharedEntity = std::make_shared<Entity>();
 
 std::shared_ptr<Entity> sharedEntity(new Entity()); // 也不建议, 因为shared_ptr会分配一块叫控制块的内存,用来存储计数,// new Entity() 也会分配一次内存, 造成效率降低.
@@ -530,11 +530,11 @@ std::shared_ptr<Entity> e0 = sharedEntity; // 共享指针可以复制;
 
 > weak_ptr 可以和 shared_ptr一起使用，但是不会增加引用计数。
 
-```C++
+```cpp
 std::weak_ptr<Entity> weakEntity = sharedEntity; // 可以复制，但是不会增加引用次数。
 ```
 
-```C++
+```cpp
 {
 	std::weak_ptr<Entity> e1;
 	{
@@ -550,7 +550,7 @@ std::weak_ptr<Entity> weakEntity = sharedEntity; // 可以复制，但是不会�
 
 浅拷贝，当我们用 = 赋值一个类时，它会将类的所有成员变量和方法复制一份，如果类中有指针，那么就只是将指针所存储的内存地址复制了一份，也就是说指向的还是同一个地址。
 
-```C++
+```cpp
 #include <iostream>
 #include <cstring>
 
@@ -612,7 +612,7 @@ Charno
 > 拷贝构造函数也是一个构造函数， 比如当你复制一个字符串的时候，它就被调用。
 > 当你把一个字符串赋值给一个对象时（也是一个字符串）,当你试图创建一个新的变量，并给它分配另一个变量（和你正在创建的变量有相同的类型）时，就复制这个变量。
 
-```C++
+```cpp
 String(const String& other)
 	: m_Buffer(other.m_Buffer), m_Size(other.m_Size)
 	{} // 这样不可以，因为我们不仅仅想复制指针，还想复制指针所指向的内存。
@@ -624,7 +624,7 @@ String(const String& other)
 
 **深度拷贝**
 
-```C++
+```cpp
 String(const String& other)
 	: m_Size(other.m_Size)
 {
@@ -636,7 +636,7 @@ String(const String& other)
 
 如果使用这样的 `PrintString` 函数，会造成资源浪费：
 
-```C++
+```cpp
 void PrintString(String string)
 {
 	std::cout << string << std::endl;
@@ -646,7 +646,7 @@ void PrintString(String string)
 函数传参也是复制传递，导致每次都要再调用一次构造拷贝函数。
 更好地选择是：
 
-```C++
+```cpp
 void PrintString(const String& string)
 {
 	std::cout << string << std:endl;
@@ -657,7 +657,7 @@ void PrintString(const String& string)
 
 拷贝构造函数的格式：
 
-```C++
+```cpp
 // 声明
 T(const T& var)；
 // 定义
@@ -789,7 +789,7 @@ _`->` 的含义就是 把指向类的指针所存的地址 + 成员变量的偏�
 
 如何使用箭头操作符，来获取内存中某个成员变量的偏移量？
 
-```C++
+```cpp
 size_t offset = (size_t)&((Vector3*)0)->z;
 ```
 
@@ -801,13 +801,13 @@ size_t offset = (size_t)&((Vector3*)0)->z;
 2. 它的使用需要包含头文件： `#include <vector>`
 3. 使用格式: **类型；尽量使用对象而非指针**
 
-```C++
+```cpp
 std::vector<T> a; // T是一种模板类型，尽量使用对象而非指针；
 ```
 
 4. 添加元素
 
-```C++
+```cpp
 a.push_back(element);
 
 // 定义一个类
@@ -822,7 +822,7 @@ vertices.push_back({4, 5, 6});
 
 5. for 循环遍历
 
-```C++
+```cpp
 // 第一种方式
 for (int i = 0; i < vertices.size, i++)
 {
@@ -837,19 +837,19 @@ for (Vertex& v : vertices) // vertices中的每一个元素，被Vertex类型的
 
 6. 清除数组列表
 
-```C++
+```cpp
 vertices.clear();
 ```
 
 7. 擦出指定元素
 
-```C++
+```cpp
 vertices.erase(vertices.begin() + 1); // 参数是迭代器类型
 ```
 
 8.  当将这些vector传递给函数、类或者其他东西时，记得使用引用。以确保没有把整个数组复制到函数中
 
-```C++
+```cpp
 void Function(const std::vector<Vector>& vertices) // 如果不需要修改数组，请加上const引用
 {
 
@@ -869,7 +869,7 @@ void Function(const std::vector<Vector>& vertices) // 如果不需要修改数�
 
 如果不优化：
 
-```C++
+```cpp
 #include <iostream>
 #include <string>
 #include <vector>
@@ -916,7 +916,7 @@ Copied!
 
 **第一步优化策略**: 直接告诉 `vector` 我们需要三个对象的空间大小, 然后再 `push_back`：
 
-```C++
+```cpp
 vertices.reserve(3); // 解决了每次内存不够，分配新内存，而把前面的都复制一遍再重新放入新内存的问题
 vertices.push_back(Vertex{1, 2, 3});
 vertices.push_back(Vertex{4, 5, 6});
@@ -937,7 +937,7 @@ Copied!
 
 **第二步策略**：避免上述情况，直接在实际的vector中构造, 可以使用 `emplace_back`, 而不是 `push_back`.
 
-```C++
+```cpp
 vectices.emplace_back(1, 2, 3); // 将不是传递已构建的vertex对象，而是传递构造函数的参数列表；也就是传递给构造函数的参数。
 ```
 
@@ -965,7 +965,7 @@ _这次优化甚至不需要很长时间，只要**知道实际发生了什么**
 
 > 把函数定义成 void,然后通过**参数引用传递**的形式“返回”两个字符串，这个实际上是修改了目标值，而不是返回值，但某种意义上它确实是返回了两个字符串，而且没有复制操作，技术上可以说是很好的。但这样做会使得函数的形参太多了，可读性降低，有利有弊
 
-````C++
+````cpp
 ```cpp
 include <iostream>
 void GetUserAge(const std::string& user_name,bool& work_status,int& age)
@@ -999,7 +999,7 @@ int main()
 
 > 也可以返回一个vector，同样可以达成返回多个数据的目的。 不同点**是Array是在栈上创建，而vector会把它的底层储存在堆上**，所以从技术上说，返回Array会更快 但以上方法都**只适用于相同类型**的多种数据的返回
 
-```C++
+```cpp
 std::array<std::string, 2> ChangeString()
 {
     std::string a = "1";
@@ -1017,7 +1017,7 @@ std::array<std::string, 2> ChangeString()
 > 可以**返回两个不同类型**的数据返。  
 > 使用std::pair这种抽象数据结构，该数据结构可以绑定两个异构成员。这种方式的弊端是**只能返回两个值。**
 
-```C++
+```cpp
 #include <iostream>
 
 std::pair<bool, int> GetUserAge(const std::string& user_name)
