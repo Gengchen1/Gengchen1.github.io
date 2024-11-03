@@ -7,3 +7,16 @@
 [data-theme='dark'] .shiki span {
   color: var(--shiki-dark);
 }
+
+/* shiki.css */
+pre {
+  background-color: #2d2d2d;
+  padding: 1em;
+  border-radius: 5px;
+  overflow: auto;
+}
+
+code {
+  font-family: 'Fira Code', monospace;
+  color: #f8f8f2;
+}
