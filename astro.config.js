@@ -22,7 +22,7 @@ export default defineConfig({
   site: 'https://Gengchen1.github.io',
   integrations: [tailwind(), react(), sitemap()],
   markdown: {
-    syntaxHighlight: true,
+    syntaxHighlight: 'shiki', // 使用 Shiki 作为语法高亮引擎
     smartypants: true,
     remarkPlugins: [remarkMath, remarkDirective, remarkEmbed, remarkSpoiler, remarkReadingTime],
     rehypePlugins: [
@@ -31,8 +31,8 @@ export default defineConfig({
       rehypeLink,
       rehypeImage,
       rehypeHeading,
+      await rehypeCodeHighlight(), // 确保插件被正确引用
       rehypeCodeBlock,
-      rehypeCodeHighlight,
       rehypeTableBlock,
     ],
     remarkRehype: { footnoteLabel: '参考', footnoteBackLabel: '返回正文' },

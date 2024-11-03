@@ -80,16 +80,13 @@ public:
 > }
 > 这样显得很杂乱，构造函数中都是初始化变量了。
 > 而这样写就便于阅读;
-> private:
-> int x , y , z;
-> public:
-> Entity()
-
-    	: x(0), y(0), z(0)
-
->     {
->     }
->
+```cpp
+private:
+    int x , y , z;
+public:
+    Entity()
+         : x(0), y(0), z(0) {}
+```
 > 第二个原因是
 > 写在函数体内,会创建两个字符串, 一次默认构造函数创建,一次是 std::string("Unknown")参数,造成了资源浪费.
 
@@ -124,7 +121,7 @@ public:
     {
         m_Name = name;
     }
-
+}
 结果：
 Created Entity !
 Created Entity with8!
