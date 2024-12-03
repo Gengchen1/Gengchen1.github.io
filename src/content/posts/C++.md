@@ -9,7 +9,7 @@ comments: true
 
 ## 36. 构造函数中初始化列表
 
-    `一种初始化类成员变量的方式`。
+    一种初始化类成员变量的方式。
 
 一般的初始化方式：
 
@@ -2045,6 +2045,353 @@ int main()
 - `unsigned short` 的范围从 `0` 开始，至少到 `65,535`
 - `unsigned long` 的范围从 `0` 开始，至少到 `4,294,967,295`
 
+## 74. C++代码的性能基准测试
+> 记住，一定要确保分析的代码在发布时是有意义的，性能基准分析应该确保在发布阶段下有意义。
+
+时间基准测试类`Timer`:
+```cpp
+class Timer{
+public:
+	Timer() {
+		_startTimePoint = std::chrono::high_resolution_clock::now();
+	}
+	~Timer() {
+		stop();
+	}
+	
+	void stop () {
+		// 结束的时间点
+		auto endTimePoint = std::chrono::high_resolution_clock::now();
+		// 计算到开始时间点度过的时间
+		auto start = std::chrono::time_point_cast<std::chrono::microseconds>(_startTimePoint).time_since_epoch().count();
+		// 计算到结束时间点度过的时间
+		auto end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimePoint).time_since_epoch().count();
+		auto duration = end - start;
+		double ms = duration * 0.001;
+
+		std::cout << duration << "us (" << ms << "ms)\n";
+	}
+private:
+	std::chrono::time_point<std::chrono::high_resolution_clock> _startTimePoint;
+};
+
+```
+
+使用以上 Timer类测试一下 `shared_ptr` 、`unique_ptr` 和 `new`之间的时间：
+```cpp
+int main() {
+	struct Vector2 {
+		float x, y;
+	};
+	std::cout << "Make Shared\n";
+	{
+		std::array<std::shared_ptr<Vector2>, 1000> sharedPtrs;
+		Timer timer;
+		for (int i = 0; i < sharedPtrs.size(); ++i) {
+			sharedPtrs[i] = std::make_shared<Vector2>();
+		}
+	}
+	std::cout << "New Shared\n";
+	{
+		std::array<std::shared_ptr<Vector2>, 1000> sharedPtrs;
+		Timer timer;
+		for (int i = 0; i < sharedPtrs.size(); ++i) {
+			sharedPtrs[i] = std::shared_ptr<Vector2>(new Vector2());
+		}
+	}
+	std::cout << "Make Unique\n";
+	{
+		std::array<std::unique_ptr<Vector2>, 1000> sharedPtrs;
+		Timer timer;
+		for (int i = 0; i < sharedPtrs.size(); ++i) {
+			sharedPtrs[i] = std::make_unique<Vector2>();
+		}
+	}
+
+
+	return 0;
+}
+```
+**结果如下：**
+```sh
+Make Shared
+49us (0.049ms)
+New Shared
+86us (0.086ms)
+Make Unique
+33us (0.033ms)
+```
+>可以看出 `make_shared`和`make_unique`性能高于`new`。
+
+
+## 75. C++的结构化绑定
+>在某些场景中我们可能需要返回多个不同类型的值，以前的方法是可以定义一个结构体，里面包含多个不同类型的值。
+
+C++17之前，除了使用结构体，只能使用 `std::get<返回值序号>(变量名)`和 `std::tie(变量名，变量名，...)`来访问多个类型返回值。
+对于这个返回`string`和 `int`l类型的值来说：
+```cpp
+std::tuple<std::string, int> CreatePerson() {
+	return {"Cherno", 24};
+}
+```
+可以使用以下两种方法访问：
+1. `std::get<>()`
+```cpp
+std::tuple<std::string, int> person = CreatePerson();
+std::string &name = std::get<0>(person);
+int age = std::get<1>(person);
+```
+2. `std::tie()`
+```cpp
+std::string name;
+int age;
+std::tie(name, age) = CreatePerson();
+```
+
+C++17版本引入了**结构化绑定**：*直接一行代码搞定*
+```cpp
+auto[name, age] = CreatePerson();
+```
+
+>注意，该方法只在C++17和之后的版本起作用，之前的版本编译器会报错。
+
+## 76. 如何处理OPTIONAL数据？
+> OPTIONAL即可能存在，也可能不存在的数据。比如，如果文件是空的，我们应该有办法看到数据是存在还是不存在。 这就需要用到了C++17中的 `std::optional`
+
+TODO
+
+## 82. C++的单例模式
+> 单例模式是一种设计模式。那么什么是单例，为什么要用它，什么时候用它？
+
+*单例是一个类的单一实例，也就是说你只打算有那个类或结构体的一个实例。*
+
+**单例的行为就像命名空间，单例类可以像命名空间一样工作。** 
+也就是说：**C++中的单例只是一种组织一堆全局变量和静态函数的方式。** 单例就是一个外表为类形式的命名空间。
+最基础的单例类：
+```cpp
+class Singleton {
+public:
+	// 删除赋值构造函数，防止通过赋值构造另一个实例。
+	Singleton(const Singleton &) = delete;
+	static Singleton &Get() {
+		return _Instance;
+	}
+	void Func() {}
+private:
+	Singleton() {}
+	static Singleton _Instance;
+};
+
+Singleton Singleton::_Instance;
+```
+访问方式：
+```cpp
+int main() {
+	Singleton &instance = Singleton::Get(); // Ok！
+	Singleton instance = Singleton::Get(); // error! 防止构造其他实例，赋值构造已删除。
+	Singelton::Get().Func();
+	return 0;
+}
+```
+实现一个随机数生成器单例类的例子：
+```cpp
+#include <iostream>
+
+class Random {
+public:
+	// 删除赋值构造函数，防止通过赋值构造另一个实例
+	Random(const Random&) = delete;
+	Random &operator=(const Random &) = delete;
+	static Random &Get() {
+		static Ramdom instance; // 也可以直接在静态函数中创建一个静态局部变量。而不再使用静态成员变量。
+		return instance;
+	}
+	void Func() {}
+	float Float() {
+		return _RandomGenerator;
+	};
+private:
+	Random() {}
+	// static Random _Instance;
+	float _RandomGenerator = 0.5f;
+};
+ // Random Random::_Instance; // 定义一个实例，以便在静态函数中使用。
+
+int main() {
+	float number = Random::Get().Float();
+	return 0;
+}
+```
+单例类的一般组成如下：
+- 标记为删除的拷贝构造函数；
+- 标记为删除的赋值运算符；
+- `Get()` 函数用来获取实例；
+-  返回成员变量的函数；
+- 私有构造函数防止在类外实例化对象；
+- 定义一个单例的唯一实例：`Random Random::_Instance;`
+主要是单例类同样具有类的一些性质，比如可以返回**类成员变量**的函数。
+
+`float number = Random::Get().Float();` 这样有点麻烦，如何可以实现直接`float number = Random::Float()`?
+```cpp
+// 将 Float()函数移动到private中，然后在public中定义一个调用该函数的静态函数；
+public:
+	static float Float() {
+		return Get().IFloat();	
+	}
+private:
+	float IFloat() { return _RandomGenerator; }
+```
+> 这样类内的函数被内联后将不会有任何性能损失。
+
+*如果成员函数在类定义中定义（即在类的声明中直接定义函数体），它被隐式地视为内联函数*
+```cpp
+static Random& Get() {
+	static Random _Instance;
+	return _Instance;
+}
+```
+
+**单例的核心**就是这个 `Get()`函数，只有第一次使用它的时候，创建一个单独实例。因为这个实例是静态局部的，所以只会在第一次调用`Get()`函数时被创建一次，且生命周期和程序生命周期一致。*一旦有了这个实例，就可以写任意数量的非静态函数，并通过Get()函数来调用它们。*
+
+>Tips: 如何想不通过 `Get()`函数，直接`Random::`来调用，可以通过将非静态成员函数变为私有，然后写一个静态函数，在其内部返回非静态函数的调用:)
+
+最后一个问题? 为什么不直接使用命名空间？而要定义一个单例类？
+> 1. 类更加好管理，可以延迟初始化，只用实例化时才被创建（静态局部变量；
+> 2. 单例类可以将构造函数和成员变量设为私有，控制对实例的访问，增强封装性和安全性。
+
+类的实例化方式有：
+1. **直接实例化**：通过构造函数直接创建对象。
+2. **动态分配**：使用 `new` 关键字在堆上创建对象。
+3. **拷贝构造**：通过拷贝构造函数创建对象。
+4. **单例模式**：通过静态方法获取类的唯一实例。
+## 83. C++中的小字符串优化
+> 小字符串，可能不需要堆分配，可以只分配一小块基于栈的缓冲区，而不是堆分配。这就是静态字符串存储，对于小于一定长度的字符串。
+*在编译器中，只有超过一定长度的字符的字符串才会调用`heap malloc`来分配内存，vs2019上小于15个字符的字符串会使用栈的缓冲区。*
+
+如果将一个常量字符串赋值给 `std::string`，当字符串长度超过15个字节时，意味着堆分配。比如：
+```cpp
+std::string name = "Cherno";
+```
+而使用`const char* name = "Cherno;"是一个静态字符串，我们不会追加东西，因此分配了一块基于栈的缓冲区。`
+
+使用代码验证一下：
+```cpp
+#include <iostream>
+void *operator new(size_t size) {
+	std::cout << "Allocating" << " " << size << " bytes\n";
+	return malloc(size);
+}
+int main() {
+	std::string name = "Cherno";// 小于15个字符
+	std::string name1 = "Cherno Small Str"; // 16个字符
+}
+```
+
+Release模式下 `std::string name = "Cherno";` 将只在栈上分配内存，打印结果为空；
+```sh
+
+D:\Vs17\Cpp\Cpp_BT\Release\01_Cpp.exe (进程 9696)已退出，返回代码为: 0。
+若要在调试停止时自动关闭控制台，请启用“工具”->“选项”->“调试”->“调试停止时自动关闭控制台”。
+按任意键关闭此窗口...
+
+```
+
+Release模式下 `std::string name = "Cherno Small Str";` 字符串大于15个，将会在堆上分配内存，调用`new`操作符：
+```sh
+Allocating 32 bytes
+
+D:\Vs17\Cpp\Cpp_BT\Release\01_Cpp.exe (进程 22248)已退出，返回代码为: 0。
+若要在调试停止时自动关闭控制台，请启用“工具”->“选项”->“调试”->“调试停止时自动关闭控制台”。
+按任意键关闭此窗口...
+
+```
+## 84. 跟踪内存分配的简单方法
+> 想要跟踪内存，一个简单的方法就是在 重载`operator new()`函数中添加断点。
+```cpp
+#include <iostream>
+#include <memory>
+
+void *operator new(size_t size) {
+	std::cout << "Allocating " << size << " bytes\n";
+	return malloc(size);
+}
+
+void operator delete(void *memory, size_t size) {
+	std::cout << "Freeing " << size << " bytes\n";
+	free(memory);
+}
+
+struct Object {
+	int x, y, z;
+};
+
+int main() {
+	{
+		std::unique_ptr<Object> obj = std::make_unique<Object>();
+	}
+	std::string name = "Cherno";
+
+	return 0;
+}
+```
+打印结果：
+```sh
+Allocating 12 bytes
+Freeing 12 bytes
+Allocating 8 bytes
+Freeing 8 bytes
+```
+更进一步优化,使用 `AllocationMetrics`结构体：
+```cpp
+#include <iostream>
+#include <memory>
+
+struct AllocationMetrics {
+	uint32_t TotalAllocated = 0;
+	uint32_t TotalFreed = 0;
+	uint32_t  CurrentUsage() {
+		return TotalAllocated - TotalFreed;
+	}
+};
+static AllocationMetrics s_AllocationMetrices;
+
+void *operator new(size_t size) {
+	s_AllocationMetrices.TotalAllocated += size;
+	return malloc(size);
+}
+
+void operator delete(void *memory, size_t size) {
+	s_AllocationMetrices.TotalFreed += size;
+	free(memory);
+}
+
+struct Object {
+	int x, y, z;
+};
+
+static void PrintMemoryUsage() {
+	std::cout << "Memory Usage: " << s_AllocationMetrices.CurrentUsage() << " bytes\n";
+}
+
+int main() {
+	PrintMemoryUsage();
+	std::string name = "Cherno";
+	PrintMemoryUsage();
+	{
+		std::unique_ptr<Object> obj = std::make_unique<Object>();
+		PrintMemoryUsage();
+	}
+	PrintMemoryUsage();
+	return 0;
+}
+```
+打印结果：
+```sh
+Memory Usage: 0 bytes
+Memory Usage: 8 bytes
+Memory Usage: 20 bytes
+Memory Usage: 8 bytes
+```
 ## 85. 左值和右值
 
 1. 左值
@@ -2057,7 +2404,7 @@ int main()
 
 3. 右值
 
-   > 右值是 **临时量**，无地址（或者说由地质但访问不到，只是一个临时量）没有存储空间短暂存在的值。_可以通过常引用或右值引用来延长右值的生命周期_
+   > 右值是 **临时量**，无地址（或者说有地址但访问不到，只是一个临时量）没有存储空间短暂存在的值。_可以通过常引用或右值引用来延长右值的生命周期_
 
 4. 右值引用
    > 右值引用不能绑定到左值，形式是：`类型名&&`。
@@ -2068,6 +2415,9 @@ int main()
 5. 右值引用的优势
 
    > 如果我们知道传入的是一个临时对象的话，那么我们就不需要担心它们是否活着，是否完整，是否拷贝。我们可以简单地偷它的资源，给到特定的对象，或者其他地方使用它们。因为我们知道它是暂时的，它不会存在很长时间 而如果如上使用const string& str，虽然可以兼容右值，但是却不能从这个字符串中窃取任何东西！因为这个str可能会在很多函数中使用，不可乱修改！（所以才加了const）
+
+> 右值引用作为形参，只接受右值作为实参，因此，右值引用可以用来检测临时变量。
+> 【注意！】这里作为形参的右值引用是有变量名 `value`的，因此是一个左值。
 
 6. 给函数传参时的四种情况
 
@@ -2088,4 +2438,397 @@ void PrintName(std::string&& name) {
 void PrintName(std::string& name) {
     std::cout << "[lvalue]: " << name << std::endl;
 }
+```
+
+## 86. 持续集成(CI)
+>CI通常指在开发期间持续集成代码的过程，本质就是构建自动化和测试，确保代码在所有平台和所有配置下都可以编译。
+
+目的：建立一个C++项目，以便可以再每次提交到github时，自动构建和测试我们的应用。
+
+可以使用类似 `Jenkins`这样的工具来写一个项目包含C++项目源文件和脚本文件，上传到服务器上，每次更改提交并上传代码后，服务器自动启动测试脚本来测试程序。
+
+TODO: 尝试一次自己的自动化项目测试流程。
+
+## 87. C++静态分析
+> 静态分析工具就是自动化地code review.
+
+## 88. 参数求值顺序
+*argument evaluation order~*
+C++标准并没有给大部分运算符规定参数求值顺序，其行为是“**未定义**”的。会根据编译器的不同而变化，完全依赖于C++编译器将代码转换成机器码的实际实现。
+比如在vs17 release 模式， C++17之前的版本中实现以下代码：
+```cpp
+#include <iostream>
+
+void PrintSum(int a, int b) {
+	std::cout << a << " + " << b << " = " << (a + b) << std::endl;
+}
+int main() {
+	int value = 0;
+	PrintSum(value++, value++); // 0 + 1 = 0 + 1?
+	return 0;
+}
+```
+
+打印结果是：
+```sh
+0 + 0 = 0
+```
+说明参数也可以不按顺序传递，而是并行传递的。
+而在C++17中执行结果是：
+```sh
+1 + 0 = 1
+```
+> 因为**C++17引入一条新规定，后缀表达式必须要其他表达式之前被计算，也就是不能并行计算，只能一个一个计算，但是计算顺序仍是不确定的。**
+
+## 89. C++的移动语义
+C++11引入了**右值引用，使得移动语义即允许我们移动对象**。拷贝是重新复制一个对象，创建一个新的堆分配。而移动语义可以直接移动对象，而不需要拷贝。
+看下面这个例子，在初始化自定义类型变量时，调用了拷贝构造函数：
+```cpp
+#include <iostream>
+
+class String {
+public:
+	String() = default;
+	String(const char *string) {
+		printf("Created!\n");
+		_size = strlen(string);
+		_Data = new char[_size];
+		memcpy(_Data, string, _size);
+	}
+	String(const String &other) {
+		printf("Copied!\n");
+		_size = other._size;
+		_Data = new char[_size];
+		memcpy(_Data, other._Data, _size);
+	}
+	~String() {
+		printf("Destoryed!\n");
+		delete[] _Data; // delete后加上[]，只是为了对每个对象调用析构函数，简单类型直接回收内存即可。
+	}
+	void Print() {
+		for (uint32_t i = 0; i < _size; i++) {
+			printf("%c", _Data[i]);
+		}
+		printf("\n");
+	}
+private:
+	char *_Data;
+	uint32_t _size;
+};
+class Entity {
+public:
+	Entity(const String &name)
+		: _name(name) { // 这里初始化_name会调用拷贝构造函数。
+
+	}
+	void printName() {
+		_name.Print();
+	}
+private:
+	String _name;
+};
+
+int main() {
+	Entity entity(String("Cherno")); 
+	entity.printName();
+	return 0;
+}
+```
+打印输出结果：
+```sh
+Created!
+Copied!
+Cherno
+```
+可见，调用了一次拷贝构造函数。
+
+接下来通过使用移动语义，使其不调用拷贝构造函数：
+这就需要写一个移动构造函数：
+```cpp
+String(String &&other) { // 移动构造函数只接受一个右值
+	printf("Moved!\n");
+	// 将 other对象的内容“偷过来”。
+	_size = other._size;
+	_Data = other._Data; // 不需要重新创建堆分配，只是赋值指针。
+
+	// 然后将other变成空
+	other._size = 0;
+	other._Data = nullptr; // 这样就不会delete同一块内存两次了。
+}
+// Entity类中也添加一个移动构造函数，以便区分拷贝构造函数和只接受右值来初始化
+Entity(Entity &&name)
+	 ： _name(name) {
+}
+```
+打印结果可以看到：
+```sh
+Created!
+Copied!
+Destoryed!
+Cherno
+``` 
+这里仍然有一个 Copied,  为什么？因为在 `Entity`中移动构造函数的初始化列表中仍然调用了`String` 的拷贝构造函数。因为 `_name(name)`中的`name`是一个**有名字的右值引用，是左值。** 
+
+如何才能使传入的形参是一个右值，从而调用 `String` 的移动构造函数呢？
+> 也就是`name`本来是 `String &&name = String("Cherno")`, 是一个左值，在`Entity`初始化列表中将其显式地转化成右值：`_name((String&&)name)`。
+
+```cpp
+Entity(Entity &&name)
+	 ： _name((String &&)name) {
+}
+```
+打印结果：
+```sh
+Created!
+Moved!
+Destoryed!
+Cherno
+```
+
+**实际中不会使用类型`(String&&)name`来转换，会使用 `std::move(name)`**:
+```cpp
+Entity(Entity &&name)
+	 : _name(std::move(name)) {
+}
+```
+
+## 90. `std::move` 和移动赋值操作符
+> `std::move`的作用将一个对象转化成右值引用，从而启用移动语义，用于移动构造函数中，帮助将一个对象资源移动到另一个对象，而不是复制。
+
+移动赋值操作符的作用是将一个对象的资源移动给另一个对象，而不进行赋值，减少内存的开销。
+**移动赋值操作符重载**：
+```cpp
+String& operator=(String &&other) {
+	printf("Moved!\n");
+	// 如果自己移动赋值自己则直接返回，不进行任何操作。
+	if (this != &other) {
+		delete[] _Data; // 使用=的变量已存在，如果不先清除，直接覆盖，会造成内存泄漏。
+		_size = other._size;
+		_Data = other._Data;
+		// 将other清空
+		other._size = 0;
+		other._Data = nullptr;
+	}
+	return *this;
+}
+```
+测试移动赋值操作符：
+```cpp
+int main() {
+	String apple = "Apple";
+	String dest;
+	std::cout << "Apple: ";
+	apple.Print();
+	std::cout << "Dest: ";
+	dest.Print();
+	dest = std::move(apple);
+	std::cout << "Apple: ";
+	apple.Print();
+	std::cout << "Dest: ";
+	dest.Print();
+
+	std::cin.get();
+	return 0;
+}
+```
+打印输出结果：
+```sh
+Created!
+Apple: Apple
+Dest:
+Moved!
+Apple:
+Dest: Apple
+
+Destoryed!
+Destoryed!
+```
+可以看到将整个字符数组从对象`apple`转移到了`dest`，而没有做任何复制，没做任何分配或解除分配之类的事情。
+
+**C++三法则：**
+- 如果需要析构函数，则一定需要拷贝构造函数和拷贝赋值操作符；
+**C++五法则：**
+- 增加了两个用来支持移动语义：一定需要移动构造函数和移动赋值运算符。
+
+使用移动赋值运算符和使用构造函数的区别：
+```cpp
+String apple = "Apple";
+String dest = std::move(apple); // 使用移动构造函数
+dest = std::move(apple); // 使用赋值移动操作符
+```
+移动构造函数是作用于正在创建的对象，而赋值移动操作符用于已存在的对象，需要先释放对象的内存再重新赋值，以免造成内存泄漏。
+
+## 91. C++实现Array
+> 实现一个固定大小的分配在栈上的Array;
+
+`alloca()`用于在栈上分配内存，函数返回时自动释放，通常用于临时返回区。
+`static_assret(条件表达式, "错误信息")`，静态断言是一个在编译时实际评估的断言。
+`void *memset(void *s, int c, size_t n)` 用于将一块内存区域设置成想要的值。`s`- 要填充内存块的指针，`c` - 要填充的值，`n` - 要填充的字节数。
+
+```cpp
+#pragma once
+
+#include <cstddef> // size_t
+#include <stdexcept> // std::out_of_range
+#include <iterator> // std::reverse_iterator
+
+// C++标准规定：单下划线+大写字母(_Identifier) 或 双下划线+小写字母(__identifier)的标识符是保留字，理论上用户不得使用。
+
+#if defined(_MSC_VER)
+#define _LIBZGCCXX_UNREACHABLE() __assume(0)
+#elif defined(__clang__)
+#define _LIBZGCCXX_UNREACHABLE() __builtin_unreachable()
+#elif defined(__GNUC__)
+#define _LIBZGCCXX_UNREACHABLE() __builtin_unreachable()
+#else
+#define _LIBZGCCXX_UNREACHABLE() \
+  do {                            \
+  } while (1)
+#endif
+
+template <class _Tp, size_t _N>
+struct Array {
+  using __value_type = _Tp;
+  using iterator = _Tp *;
+  using const_iterator = _Tp const *;
+  using difference_type = std::ptrdiff_t;
+  using pointer = _Tp *;
+  using const_pointer = _Tp const &;
+  using reference = _Tp &;
+  using const_reference = _Tp const &;
+  using reverse_iterator = std::reverse_iterator<_Tp *>;
+  using const_reverse_iterator = std::reverse_iterator<_Tp const *>;
+
+  _Tp _M_elements[_N];
+  // size_t 类型可以根据操作系统不同来改变大小，即节省空间又防止空间不够.
+  // 加 constexpr 使其编译期求出
+  static constexpr size_t size() { return _N; }
+  static constexpr size_t max_size() { return _N; }
+  // 这里的&引用是为了给数组元素赋值.
+  _Tp &operator[](size_t __i) noexcept {
+    // 如果传int , 会多发生一步：movzx %eax, %rax ,然后再 lea %rax(%rsp)
+    return _M_elements[__i];
+  }
+  // 要保证 const对象不改变元素的值，这里返回值应该是const.
+  // 这里的引用&是为了减少拷贝的开销.
+  const _Tp &operator[](size_t __i) const noexcept { return _M_elements[__i]; }
+
+  void swap(Array &__that) noexcept(
+      std::is_nothrow_copy_assignable<_Tp>::value) {
+    for (size_t __i = 0; __i < _N; __i++) {
+      std::swap(_M_elements[__i], __that._M_elements[__i]);
+    }
+  }
+
+  // noexcept(noexcept(_M_elements[0] = __val)) 表示如果_Tp类型写入无异常,
+  // 里层noexcept就返回True, 则整个fill也无异常。
+  // 以上写法相当于 noexcpet(std::is_nothrow_copy_assignable<_Tp>)
+  void fill(const _Tp &__val) noexcept(
+      std::is_nothrow_copy_assignable<_Tp>::value) {
+    for (size_t __i = 0; __i < _N; ++__i) {
+      _M_elements[__i] = __val;
+    }
+  }
+
+  _Tp &front() noexcept { return _M_elements[0]; }
+  const _Tp &front() const noexcept { return _M_elements[0]; }
+
+  _Tp &back() noexcept { return _M_elements[_N - 1]; }
+  const _Tp &back() const noexcept { return _M_elements[_N - 1]; }
+
+  _Tp &at(size_t __i) {
+    // 小概率发生的条件表达式，使用 [[unlikely]]修饰，让编译器去优化。
+    if (__i >= _N) [[__unlikely__]] {
+      throw std::out_of_range("out of range! i = " + std::to_string(__i));
+    }
+    return _M_elements[__i];
+  }
+   
+  const _Tp &at(size_t __i) const {
+    if (__i >= _N) [[__unlikely__]] {
+      // throw卸载这里会占用L1i, 指令缓存.[[unlikely]] 会把这些转移到.clod区间。
+      throw std::out_of_range("out of range! i = " + std::to_string(__i));
+    }
+    return _M_elements[__i];
+  }
+  _Tp const *data() const noexcept { return _M_elements; }
+  _Tp *data() noexcept { return _M_elements; }
+  _Tp const *cdata() const noexcept { return _M_elements; }
+
+  _Tp *begin() noexcept { return _M_elements; }
+  _Tp *end() noexcept { return _M_elements + _N; }
+
+  const _Tp *begin() const noexcept { return _M_elements; }
+  const _Tp *end() const noexcept { return _M_elements + _N; }
+  const _Tp *cbegin() const noexcept { return _M_elements; }
+  const _Tp *cend() const noexcept { return _M_elements + _N; }
+
+  const_reverse_iterator crbegin() const noexcept {
+    return const_reverse_iterator(end());
+  }
+  const_reverse_iterator crend() const noexcept {
+    return const_reverse_iterator(begin());
+  }
+
+  reverse_iterator rbegin() noexcept {
+    return reverse_iterator(end());
+  }
+  reverse_iterator rend() noexcept {
+    return reverse_iterator(begin());
+  }
+
+};
+
+
+// 0长数组偏特化
+template <class _Tp>
+struct Array<_Tp, 0> {
+  using __value_type = _Tp;
+  using iterator = _Tp *;
+  using const_iterator = _Tp const *;
+  using pointer = _Tp *;
+  using const_pointer = _Tp const *;
+  using reference = _Tp &;
+  using const_reference = _Tp const &;
+  using reverse_iterator = _Tp *;
+  using const_reverse_iterator = _Tp const *;
+
+  _Tp _M_elements[0];
+  static constexpr size_t size() { return 0; }
+  static constexpr size_t max_size() { return 0; }
+  _Tp &operator[](size_t __i) noexcept { _LIBZGCCXX_UNREACHABLE(); }
+  const _Tp &operator[](size_t __i) const noexcept { _LIBZGCCXX_UNREACHABLE(); }
+
+  _Tp &front() noexcept { _LIBZGCCXX_UNREACHABLE(); }
+  const _Tp &front() const noexcept { _LIBZGCCXX_UNREACHABLE(); }
+
+  _Tp &back() noexcept { _LIBZGCCXX_UNREACHABLE(); }
+  const _Tp &back() const noexcept { _LIBZGCCXX_UNREACHABLE(); }
+
+  _Tp &at(size_t __i) {
+    throw std::out_of_range("out of range! __i = " + std::to_string(__i));
+  }
+  const _Tp &at(size_t __i) const {
+    throw std::out_of_range("out of range! __i = " + std::to_string(__i));
+  }
+
+  _Tp const *data() const noexcept { return nullptr; }
+  _Tp *data() noexcept { return nullptr; }
+  _Tp const *cdata() const noexcept { return nullptr; }
+
+  _Tp *begin() noexcept { return nullptr; }
+  _Tp *end() noexcept { return nullptr; }
+  const _Tp *cbegin() const noexcept { return nullptr; }
+  const _Tp *cend() const noexcept { return nullptr; }
+
+  const _Tp *begin() const noexcept { return nullptr; }
+  const _Tp *end() const noexcept { return nullptr; }
+
+  void fill(const _Tp &) noexcept {}
+  void swap(Array &__that) noexcept {}
+};
+
+// 实现 a{1, 2, 3} 来创建数组
+template <class _Tp, class ..._Ts>
+Array(_Tp, _Ts...) -> Array<_Tp, 1 + sizeof...(_Ts)>;
 ```
