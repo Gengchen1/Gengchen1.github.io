@@ -1,3 +1,4 @@
+
 [submodule "ros2_book_1"]
-	path = ros2_book
+	path = ros2_book_1
 	url = git@github.com:Gengchen1/ros2_book_1.git
