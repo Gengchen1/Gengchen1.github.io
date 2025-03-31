@@ -133,6 +133,21 @@ we can use 3 backticks ``` in new line and write snippet and close with 3 backti
 </html>
 ```
 
+```javascript
+function greet(name) {
+  console.log(`Hello, ${name}!`)
+}
+
+greet('World')
+```
+
+```python
+def greet(name):
+    print(f"Hello, {name}!")
+
+greet("World")
+```
+
 ```
 const var text = "hello world"
 ```

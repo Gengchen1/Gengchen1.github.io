@@ -9,7 +9,7 @@ comments: true
 
 ## 36. 构造函数中初始化列表
 
-    一种初始化类成员变量的方式。
+一种初始化类成员变量的方式。
 
 一般的初始化方式：
 
@@ -63,8 +63,8 @@ public:
 };
 ```
 
-    注意：使用初始化列表时，初始化的变量顺序要和定义变量时的一致。
-    因为不管在初始化列表中如何写，他都会按照类成员的定义顺序进行初始化。
+注意：使用初始化列表时，初始化的变量顺序要和定义变量时的一致。
+因为不管在初始化列表中如何写，他都会按照类成员的定义顺序进行初始化。
 
 为什么要使用初始化列表来初始化成员变量？
 
@@ -79,7 +79,8 @@ public:
 > int z = 0;
 > }
 > 这样显得很杂乱，构造函数中都是初始化变量了。
-> 而这样写就便于阅读;
+> 而这样写就便于阅读:
+
 ```cpp
 private:
     int x , y , z;
@@ -87,6 +88,7 @@ public:
     Entity()
          : x(0), y(0), z(0) {}
 ```
+
 > 第二个原因是
 > 写在函数体内,会创建两个字符串, 一次默认构造函数创建,一次是 std::string("Unknown")参数,造成了资源浪费.
 
@@ -122,9 +124,9 @@ public:
         m_Name = name;
     }
 }
-结果：
-Created Entity !
-Created Entity with8!
+// 结果：
+// Created Entity !
+// Created Entity with8!
 ```
 
 而对于整数这种基础类型，不会被初始化，除非显式赋值初始化它们。
@@ -133,7 +135,7 @@ Created Entity with8!
 
 ## 37. 三元运算符
 
-    由 : 和 ？组成，只是 `if` 语句的语法糖。
+由 : 和 ？组成，只是 `if` 语句的语法糖。
 
 当需要根据一种特定的条件给变量赋值时，可以用一个问号加冒号来代替 `if else` 语句。
 两个例子：
@@ -173,8 +175,8 @@ delete entity; //使用完对象后，要手动进行删除。
 
 ## 39. new 关键字
 
-    new 关键字的作用是分配一块堆上的内存，用法是 new + 数据类型。
-    根据所写的数据类型，以字节为单位决定了要分配的内存大小。
+new 关键字的作用是分配一块堆上的内存，用法是 new + 数据类型。
+根据所写的数据类型，以字节为单位决定了要分配的内存大小。
 
 - new关键字后面加类时，做了两件事： 1. 在堆上为这个类分配了一块内存 2. 调用了这个类的构造函数。
 - new关键字的底层其实就是调用了C标准库里的 `malloc()` 函数来分配内存，然后又调用了 `Entity` 的构造函数。
@@ -859,8 +861,7 @@ void Function(const std::vector<Vector>& vertices) // 如果不需要修改数�
 >
 > 1.  创建一个vector, 然后push_back元素，也就是向数组中添加元素;
 > 2.  如果vector的空间不够，不能容纳新的想要的元素时, 就需要重新分配新的内存，至少足够容纳这些想要加入的新元素。
-> 3.  而**当前vector的内容，从内存中的旧位置复制到内存中的新位置，然后删除旧位置的内存。**
->     _这将是一个缓慢的操作，我们需要复制所有的元素，再重新分配。_
+> 3.  而**当前vector的内容，从内存中的旧位置复制到内存中的新位置，然后删除旧位置的内存。** > _这将是一个缓慢的操作，我们需要复制所有的元素，再重新分配。_
 
     这就是今天的优化策略，如何避免复制对象，特别是vector对象？
 
@@ -2045,9 +2046,11 @@ int main()
 - `unsigned long` 的范围从 `0` 开始，至少到 `4,294,967,295`
 
 ## 74. C++代码的性能基准测试
+
 > 记住，一定要确保分析的代码在发布时是有意义的，性能基准分析应该确保在发布阶段下有意义。
 
 时间基准测试类`Timer`:
+
 ```cpp
 class Timer{
 public:
@@ -2057,7 +2060,7 @@ public:
 	~Timer() {
 		stop();
 	}
-	
+
 	void stop () {
 		// 结束的时间点
 		auto endTimePoint = std::chrono::high_resolution_clock::now();
@@ -2077,6 +2080,7 @@ private:
 ```
 
 使用以上 Timer类测试一下 `shared_ptr` 、`unique_ptr` 和 `new`之间的时间：
+
 ```cpp
 int main() {
 	struct Vector2 {
@@ -2111,7 +2115,9 @@ int main() {
 	return 0;
 }
 ```
+
 **结果如下：**
+
 ```sh
 Make Shared
 49us (0.049ms)
@@ -2120,53 +2126,64 @@ New Shared
 Make Unique
 33us (0.033ms)
 ```
->可以看出 `make_shared`和`make_unique`性能高于`new`。
 
+> 可以看出 `make_shared`和`make_unique`性能高于`new`。
 
 ## 75. C++的结构化绑定
->在某些场景中我们可能需要返回多个不同类型的值，以前的方法是可以定义一个结构体，里面包含多个不同类型的值。
+
+> 在某些场景中我们可能需要返回多个不同类型的值，以前的方法是可以定义一个结构体，里面包含多个不同类型的值。
 
 C++17之前，除了使用结构体，只能使用 `std::get<返回值序号>(变量名)`和 `std::tie(变量名，变量名，...)`来访问多个类型返回值。
 对于这个返回`string`和 `int`l类型的值来说：
+
 ```cpp
 std::tuple<std::string, int> CreatePerson() {
 	return {"Cherno", 24};
 }
 ```
+
 可以使用以下两种方法访问：
+
 1. `std::get<>()`
+
 ```cpp
 std::tuple<std::string, int> person = CreatePerson();
 std::string &name = std::get<0>(person);
 int age = std::get<1>(person);
 ```
+
 2. `std::tie()`
+
 ```cpp
 std::string name;
 int age;
 std::tie(name, age) = CreatePerson();
 ```
 
-C++17版本引入了**结构化绑定**：*直接一行代码搞定*
+C++17版本引入了**结构化绑定**：_直接一行代码搞定_
+
 ```cpp
 auto[name, age] = CreatePerson();
 ```
 
->注意，该方法只在C++17和之后的版本起作用，之前的版本编译器会报错。
+> 注意，该方法只在C++17和之后的版本起作用，之前的版本编译器会报错。
 
 ## 76. 如何处理OPTIONAL数据？
+
 > OPTIONAL即可能存在，也可能不存在的数据。比如，如果文件是空的，我们应该有办法看到数据是存在还是不存在。 这就需要用到了C++17中的 `std::optional`
 
 TODO
 
 ## 82. C++的单例模式
+
 > 单例模式是一种设计模式。那么什么是单例，为什么要用它，什么时候用它？
 
-*单例是一个类的单一实例，也就是说你只打算有那个类或结构体的一个实例。*
+_单例是一个类的单一实例，也就是说你只打算有那个类或结构体的一个实例。_
 
-**单例的行为就像命名空间，单例类可以像命名空间一样工作。** 
+**单例的行为就像命名空间，单例类可以像命名空间一样工作。**
 也就是说：**C++中的单例只是一种组织一堆全局变量和静态函数的方式。** 单例就是一个外表为类形式的命名空间。
 最基础的单例类：
+
 ```cpp
 class Singleton {
 public:
@@ -2183,7 +2200,9 @@ private:
 
 Singleton Singleton::_Instance;
 ```
+
 访问方式：
+
 ```cpp
 int main() {
 	Singleton &instance = Singleton::Get(); // Ok！
@@ -2192,7 +2211,9 @@ int main() {
 	return 0;
 }
 ```
+
 实现一个随机数生成器单例类的例子：
+
 ```cpp
 #include <iostream>
 
@@ -2221,28 +2242,33 @@ int main() {
 	return 0;
 }
 ```
+
 单例类的一般组成如下：
+
 - 标记为删除的拷贝构造函数；
 - 标记为删除的赋值运算符；
 - `Get()` 函数用来获取实例；
--  返回成员变量的函数；
+- 返回成员变量的函数；
 - 私有构造函数防止在类外实例化对象；
 - 定义一个单例的唯一实例：`Random Random::_Instance;`
-主要是单例类同样具有类的一些性质，比如可以返回**类成员变量**的函数。
+  主要是单例类同样具有类的一些性质，比如可以返回**类成员变量**的函数。
 
 `float number = Random::Get().Float();` 这样有点麻烦，如何可以实现直接`float number = Random::Float()`?
+
 ```cpp
 // 将 Float()函数移动到private中，然后在public中定义一个调用该函数的静态函数；
 public:
 	static float Float() {
-		return Get().IFloat();	
+		return Get().IFloat();
 	}
 private:
 	float IFloat() { return _RandomGenerator; }
 ```
+
 > 这样类内的函数被内联后将不会有任何性能损失。
 
-*如果成员函数在类定义中定义（即在类的声明中直接定义函数体），它被隐式地视为内联函数*
+_如果成员函数在类定义中定义（即在类的声明中直接定义函数体），它被隐式地视为内联函数_
+
 ```cpp
 static Random& Get() {
 	static Random _Instance;
@@ -2250,30 +2276,37 @@ static Random& Get() {
 }
 ```
 
-**单例的核心**就是这个 `Get()`函数，只有第一次使用它的时候，创建一个单独实例。因为这个实例是静态局部的，所以只会在第一次调用`Get()`函数时被创建一次，且生命周期和程序生命周期一致。*一旦有了这个实例，就可以写任意数量的非静态函数，并通过Get()函数来调用它们。*
+**单例的核心**就是这个 `Get()`函数，只有第一次使用它的时候，创建一个单独实例。因为这个实例是静态局部的，所以只会在第一次调用`Get()`函数时被创建一次，且生命周期和程序生命周期一致。_一旦有了这个实例，就可以写任意数量的非静态函数，并通过Get()函数来调用它们。_
 
->Tips: 如何想不通过 `Get()`函数，直接`Random::`来调用，可以通过将非静态成员函数变为私有，然后写一个静态函数，在其内部返回非静态函数的调用:)
+> Tips: 如何想不通过 `Get()`函数，直接`Random::`来调用，可以通过将非静态成员函数变为私有，然后写一个静态函数，在其内部返回非静态函数的调用:)
 
 最后一个问题? 为什么不直接使用命名空间？而要定义一个单例类？
+
 > 1. 类更加好管理，可以延迟初始化，只用实例化时才被创建（静态局部变量；
 > 2. 单例类可以将构造函数和成员变量设为私有，控制对实例的访问，增强封装性和安全性。
 
 类的实例化方式有：
+
 1. **直接实例化**：通过构造函数直接创建对象。
 2. **动态分配**：使用 `new` 关键字在堆上创建对象。
 3. **拷贝构造**：通过拷贝构造函数创建对象。
 4. **单例模式**：通过静态方法获取类的唯一实例。
+
 ## 83. C++中的小字符串优化
+
 > 小字符串，可能不需要堆分配，可以只分配一小块基于栈的缓冲区，而不是堆分配。这就是静态字符串存储，对于小于一定长度的字符串。
-*在编译器中，只有超过一定长度的字符的字符串才会调用`heap malloc`来分配内存，vs2019上小于15个字符的字符串会使用栈的缓冲区。*
+> _在编译器中，只有超过一定长度的字符的字符串才会调用`heap malloc`来分配内存，vs2019上小于15个字符的字符串会使用栈的缓冲区。_
 
 如果将一个常量字符串赋值给 `std::string`，当字符串长度超过15个字节时，意味着堆分配。比如：
+
 ```cpp
 std::string name = "Cherno";
 ```
+
 而使用`const char* name = "Cherno;"是一个静态字符串，我们不会追加东西，因此分配了一块基于栈的缓冲区。`
 
 使用代码验证一下：
+
 ```cpp
 #include <iostream>
 void *operator new(size_t size) {
@@ -2287,6 +2320,7 @@ int main() {
 ```
 
 Release模式下 `std::string name = "Cherno";` 将只在栈上分配内存，打印结果为空；
+
 ```sh
 
 D:\Vs17\Cpp\Cpp_BT\Release\01_Cpp.exe (进程 9696)已退出，返回代码为: 0。
@@ -2296,6 +2330,7 @@ D:\Vs17\Cpp\Cpp_BT\Release\01_Cpp.exe (进程 9696)已退出，返回代码为: 
 ```
 
 Release模式下 `std::string name = "Cherno Small Str";` 字符串大于15个，将会在堆上分配内存，调用`new`操作符：
+
 ```sh
 Allocating 32 bytes
 
@@ -2304,8 +2339,11 @@ D:\Vs17\Cpp\Cpp_BT\Release\01_Cpp.exe (进程 22248)已退出，返回代码为:
 按任意键关闭此窗口...
 
 ```
+
 ## 84. 跟踪内存分配的简单方法
+
 > 想要跟踪内存，一个简单的方法就是在 重载`operator new()`函数中添加断点。
+
 ```cpp
 #include <iostream>
 #include <memory>
@@ -2333,14 +2371,18 @@ int main() {
 	return 0;
 }
 ```
+
 打印结果：
+
 ```sh
 Allocating 12 bytes
 Freeing 12 bytes
 Allocating 8 bytes
 Freeing 8 bytes
 ```
+
 更进一步优化,使用 `AllocationMetrics`结构体：
+
 ```cpp
 #include <iostream>
 #include <memory>
@@ -2384,13 +2426,16 @@ int main() {
 	return 0;
 }
 ```
+
 打印结果：
+
 ```sh
 Memory Usage: 0 bytes
 Memory Usage: 8 bytes
 Memory Usage: 20 bytes
 Memory Usage: 8 bytes
 ```
+
 ## 85. 左值和右值
 
 1. 左值
@@ -2440,7 +2485,8 @@ void PrintName(std::string& name) {
 ```
 
 ## 86. 持续集成(CI)
->CI通常指在开发期间持续集成代码的过程，本质就是构建自动化和测试，确保代码在所有平台和所有配置下都可以编译。
+
+> CI通常指在开发期间持续集成代码的过程，本质就是构建自动化和测试，确保代码在所有平台和所有配置下都可以编译。
 
 目的：建立一个C++项目，以便可以再每次提交到github时，自动构建和测试我们的应用。
 
@@ -2449,12 +2495,15 @@ void PrintName(std::string& name) {
 TODO: 尝试一次自己的自动化项目测试流程。
 
 ## 87. C++静态分析
+
 > 静态分析工具就是自动化地code review.
 
 ## 88. 参数求值顺序
-*argument evaluation order~*
+
+_argument evaluation order~_
 C++标准并没有给大部分运算符规定参数求值顺序，其行为是“**未定义**”的。会根据编译器的不同而变化，完全依赖于C++编译器将代码转换成机器码的实际实现。
 比如在vs17 release 模式， C++17之前的版本中实现以下代码：
+
 ```cpp
 #include <iostream>
 
@@ -2469,19 +2518,25 @@ int main() {
 ```
 
 打印结果是：
+
 ```sh
 0 + 0 = 0
 ```
+
 说明参数也可以不按顺序传递，而是并行传递的。
 而在C++17中执行结果是：
+
 ```sh
 1 + 0 = 1
 ```
+
 > 因为**C++17引入一条新规定，后缀表达式必须要其他表达式之前被计算，也就是不能并行计算，只能一个一个计算，但是计算顺序仍是不确定的。**
 
 ## 89. C++的移动语义
+
 C++11引入了**右值引用，使得移动语义即允许我们移动对象**。拷贝是重新复制一个对象，创建一个新的堆分配。而移动语义可以直接移动对象，而不需要拷贝。
 看下面这个例子，在初始化自定义类型变量时，调用了拷贝构造函数：
+
 ```cpp
 #include <iostream>
 
@@ -2528,21 +2583,25 @@ private:
 };
 
 int main() {
-	Entity entity(String("Cherno")); 
+	Entity entity(String("Cherno"));
 	entity.printName();
 	return 0;
 }
 ```
+
 打印输出结果：
+
 ```sh
 Created!
 Copied!
 Cherno
 ```
+
 可见，调用了一次拷贝构造函数。
 
 接下来通过使用移动语义，使其不调用拷贝构造函数：
 这就需要写一个移动构造函数：
+
 ```cpp
 String(String &&other) { // 移动构造函数只接受一个右值
 	printf("Moved!\n");
@@ -2559,16 +2618,20 @@ Entity(Entity &&name)
 	 ： _name(name) {
 }
 ```
+
 打印结果可以看到：
+
 ```sh
 Created!
 Copied!
 Destoryed!
 Cherno
-``` 
-这里仍然有一个 Copied,  为什么？因为在 `Entity`中移动构造函数的初始化列表中仍然调用了`String` 的拷贝构造函数。因为 `_name(name)`中的`name`是一个**有名字的右值引用，是左值。** 
+```
+
+这里仍然有一个 Copied, 为什么？因为在 `Entity`中移动构造函数的初始化列表中仍然调用了`String` 的拷贝构造函数。因为 `_name(name)`中的`name`是一个**有名字的右值引用，是左值。**
 
 如何才能使传入的形参是一个右值，从而调用 `String` 的移动构造函数呢？
+
 > 也就是`name`本来是 `String &&name = String("Cherno")`, 是一个左值，在`Entity`初始化列表中将其显式地转化成右值：`_name((String&&)name)`。
 
 ```cpp
@@ -2576,7 +2639,9 @@ Entity(Entity &&name)
 	 ： _name((String &&)name) {
 }
 ```
+
 打印结果：
+
 ```sh
 Created!
 Moved!
@@ -2585,6 +2650,7 @@ Cherno
 ```
 
 **实际中不会使用类型`(String&&)name`来转换，会使用 `std::move(name)`**:
+
 ```cpp
 Entity(Entity &&name)
 	 : _name(std::move(name)) {
@@ -2592,10 +2658,12 @@ Entity(Entity &&name)
 ```
 
 ## 90. `std::move` 和移动赋值操作符
+
 > `std::move`的作用将一个对象转化成右值引用，从而启用移动语义，用于移动构造函数中，帮助将一个对象资源移动到另一个对象，而不是复制。
 
 移动赋值操作符的作用是将一个对象的资源移动给另一个对象，而不进行赋值，减少内存的开销。
 **移动赋值操作符重载**：
+
 ```cpp
 String& operator=(String &&other) {
 	printf("Moved!\n");
@@ -2611,7 +2679,9 @@ String& operator=(String &&other) {
 	return *this;
 }
 ```
+
 测试移动赋值操作符：
+
 ```cpp
 int main() {
 	String apple = "Apple";
@@ -2630,7 +2700,9 @@ int main() {
 	return 0;
 }
 ```
+
 打印输出结果：
+
 ```sh
 Created!
 Apple: Apple
@@ -2642,22 +2714,27 @@ Dest: Apple
 Destoryed!
 Destoryed!
 ```
+
 可以看到将整个字符数组从对象`apple`转移到了`dest`，而没有做任何复制，没做任何分配或解除分配之类的事情。
 
 **C++三法则：**
+
 - 如果需要析构函数，则一定需要拷贝构造函数和拷贝赋值操作符；
-**C++五法则：**
+  **C++五法则：**
 - 增加了两个用来支持移动语义：一定需要移动构造函数和移动赋值运算符。
 
 使用移动赋值运算符和使用构造函数的区别：
+
 ```cpp
 String apple = "Apple";
 String dest = std::move(apple); // 使用移动构造函数
 dest = std::move(apple); // 使用赋值移动操作符
 ```
+
 移动构造函数是作用于正在创建的对象，而赋值移动操作符用于已存在的对象，需要先释放对象的内存再重新赋值，以免造成内存泄漏。
 
 ## 91. C++实现Array
+
 > 实现一个固定大小的分配在栈上的Array;
 
 `alloca()`用于在栈上分配内存，函数返回时自动释放，通常用于临时返回区。
@@ -2742,7 +2819,7 @@ struct Array {
     }
     return _M_elements[__i];
   }
-   
+
   const _Tp &at(size_t __i) const {
     if (__i >= _N) [[__unlikely__]] {
       // throw卸载这里会占用L1i, 指令缓存.[[unlikely]] 会把这些转移到.clod区间。
