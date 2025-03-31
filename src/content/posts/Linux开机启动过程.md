@@ -1,7 +1,7 @@
 ---
 title: Linux开启启动过程
 date: 2025-03-31
-summary: 
+summary: 学习Linux系统从上电到用户界面发生了什么？
 category: Linux
 tags:
   - Linux
