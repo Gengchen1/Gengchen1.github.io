@@ -33,7 +33,7 @@ comments: true
 - `systemd`通过`basic.taeget`来决定启动多用户文本界面还是图形界面
 >`systemd`负责所有初始化，并在linux启动时在后台运行。
 
-   ![Linux启动过程](./attachments/Pasted%20image%2020250312170218.png)
+   ![Linux启动过程](https://github.com/Gengchen1/Gengchen1.github.io/blob/master/src/content/posts/attachments/Pasted%20image%20250313225601.png)
    [【双语视界】按下电源键后，Linux是如何启动的？一步步揭秘!](https://www.bilibili.com/video/BV1fPRuYYECH/?share_source=copy_web&vd_source=aadea25fda118912d01970bc99de2d9b)
 
 **总结：**

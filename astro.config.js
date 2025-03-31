@@ -16,44 +16,32 @@ import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import { site } from './src/config.json'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import swup from '@swup/astro'
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://drowsyindra.github.io',
-  integrations: [tailwind(), react(), sitemap()],
+  site: site.url,
+  integrations: [
+    tailwind(),
+    react(),
+    sitemap(),
+    swup({
+      theme: false,
+      animationClass: 'swup-transition-',
+      containers: ['main'],
+      morph: ['[component-export="Provider"]'],
+    }),
+  ],
   markdown: {
-    syntaxHighlight: 'shiki', // Enable syntax highlighting
-    shikiConfig: {
-      // 选择 Shiki 内置的主题（或添加你自己的主题）
-      // https://shiki.style/themes
-      theme: 'dracula',
-      // 另外，也提供了多种主题
-      // 查看下面关于使用亮/暗双主题的的说明
-      themes: {
-        light: 'github-light',
-        dark: 'github-dark',
-      },
-      // 禁用默认配色
-      // https://shiki.style/guide/dual-themes#without-default-color
-      // (添加于 v4.12.0)
-      defaultColor: true,
-      // 添加自定义语言
-      // 注意：Shiki 内置了无数语言，包括 .astro！
-      // https://shiki.style/languages
-      langs: ['c', 'cpp', 'python'],
-      // 为语言添加自定义别名
-      // 将别名映射到 Shiki 语言 ID：https://shiki.style/languages#bundled-languages
-      // https://shiki.style/guide/load-lang#custom-language-aliases
-      langAlias: {
-        cjs: "javascript"
-      },
-      // 启用自动换行，以防止水平滚动
-      wrap: true,
-      // 添加自定义转换器：https://shiki.style/guide/transformers
-      // 查找常用转换器：https://shiki.style/packages/transformers
-      transformers: [],
-    },
+    syntaxHighlight: false,
     smartypants: false,
+    // 另外，也提供了多种主题
+    // 查看下面关于使用亮/暗双主题的的说明
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+    wrap: true,
     remarkPlugins: [remarkMath, remarkDirective, remarkEmbed, remarkSpoiler, remarkReadingTime],
     rehypePlugins: [
       rehypeHeadingIds,
@@ -66,5 +54,12 @@ export default defineConfig({
       rehypeTableBlock,
     ],
     remarkRehype: { footnoteLabel: '参考', footnoteBackLabel: '返回正文' },
+  },
+  vite: {
+    build: {
+      rollupOptions: {
+        external: ['/pagefind/pagefind.js'],
+      },
+    },
   },
 })

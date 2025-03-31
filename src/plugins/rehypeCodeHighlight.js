@@ -8,6 +8,5 @@ export const rehypeCodeHighlight = [
       dark: 'github-dark',
     },
     defaultColor: false,
-    langs: ['c', 'cpp', 'python', 'javascript'] // 添加需要支持的语言
   },
 ]

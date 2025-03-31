@@ -4,9 +4,11 @@ import appConfig from '@/config.json'
 import { DocSearchModal, useDocSearchKeyboardEvents } from '@docsearch/react'
 import '@docsearch/css'
 import { RootPortal } from './RootPortal'
+import { useRef } from 'react' // 添加这一行导入 useRef
 
 export function SearchPanel() {
   const [isOpen, setIsOpen] = useAtom(searchPanelOpenAtom)
+  const searchButtonRef = useRef(null) // 添加这一行创建引用
 
   const onOpen = () => {
     setIsOpen(true)
@@ -19,6 +21,7 @@ export function SearchPanel() {
     isOpen,
     onOpen,
     onClose,
+    searchButtonRef, // 添加搜索按钮引用
   })
 
   return (
