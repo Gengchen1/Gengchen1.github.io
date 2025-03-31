@@ -1,7 +1,11 @@
 ---
-created: 2025-03-09
+title: C语言编译过程再理解
+date: 2025-03-31
+summary: 重新巩固一下以前的知识
+category: Linux
 tags:
   - Linux
+comments: true
 ---
 1. 预处理
    >宏替换、头文件展开、去注释、条件编译
