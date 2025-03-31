@@ -36,7 +36,7 @@ export default defineConfig({
       // 禁用默认配色
       // https://shiki.style/guide/dual-themes#without-default-color
       // (添加于 v4.12.0)
-      defaultColor: false,
+      defaultColor: true,
       // 添加自定义语言
       // 注意：Shiki 内置了无数语言，包括 .astro！
       // https://shiki.style/languages
