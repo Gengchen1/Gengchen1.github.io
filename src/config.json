@@ -16,7 +16,7 @@
   "hero": {
     "name": "Gengchen",
     "bio": "机器人爱好者",
-    "description": "理想是追随稚晖君,欢迎一同学习",
+    "description": "理想是成为一名机器人工程师,欢迎一同学习",
     "socials": [
       {
         "name": "Github",
@@ -49,7 +49,7 @@
         "color": "rgb(106,90,205)"
       }
     ],
-    "yiyan": "记录点滴，分享知识"
+    "yiyan": "用于开始，遇到问题，解决问题，事后总结。"
   },
   "color": {
     "accent": [
